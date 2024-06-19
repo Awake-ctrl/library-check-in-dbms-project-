@@ -1,0 +1,62 @@
+-- Create the database (execute this command in pgAdmin's query tool)
+CREATE DATABASE library_dbms;
+
+-- Connect to the newly created database
+\c library_dbms
+
+-- Create tables
+CREATE TABLE users (
+    username VARCHAR(50) PRIMARY KEY,
+    password VARCHAR(50) NOT NULL
+);
+
+CREATE TABLE students (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    branch VARCHAR(50) NOT NULL,
+    year INTEGER NOT NULL,
+    ug_pg VARCHAR(10) NOT NULL,
+    photo BYTEA
+);
+
+CREATE TABLE faculty (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    department VARCHAR(100) NOT NULL,
+    photo BYTEA,
+    steak_of_days INTEGER
+);
+
+CREATE TABLE logs (
+    id SERIAL PRIMARY KEY,
+    person_id INTEGER NOT NULL,
+    person_type VARCHAR(50) NOT NULL,
+    check_in_time TIMESTAMP,
+    check_out_time TIMESTAMP,
+    FOREIGN KEY (person_id) REFERENCES students (id),
+    FOREIGN KEY (person_id) REFERENCES faculty (id)
+);
+
+-- Insert admin user
+INSERT INTO users (username, password) VALUES ('admin', 'lib@123');
+
+
+
+-- Connect to the library_dbms database
+\c library_dbms
+
+-- Insert dummy data into students table
+INSERT INTO students (name, branch, year, ug_pg, photo) VALUES
+('Alice Johnson', 'Computer Science', 3, 'UG', NULL),
+('Bob Smith', 'Electrical Engineering', 2, 'UG', NULL),
+('Carol White', 'Mechanical Engineering', 1, 'UG', NULL),
+('David Brown', 'Physics', 4, 'UG', NULL),
+('Eve Davis', 'Mathematics', 2, 'PG', NULL);
+
+-- Insert dummy data into faculty table
+INSERT INTO faculty (name, department, photo, steak_of_days) VALUES
+('Dr. Frank Green', 'Computer Science', NULL, 120),
+('Dr. Grace Hall', 'Electrical Engineering', NULL, 200),
+('Dr. Henry Adams', 'Mechanical Engineering', NULL, 80),
+('Dr. Irene Baker', 'Physics', NULL, 150),
+('Dr. Jack Cooper', 'Mathematics', NULL, 100);
