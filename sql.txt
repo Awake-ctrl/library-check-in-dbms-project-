@@ -27,14 +27,18 @@ CREATE TABLE faculty (
     steak_of_days INTEGER
 );
 
-CREATE TABLE logs (
-    id SERIAL PRIMARY KEY,
-    person_id INTEGER NOT NULL,
-    person_type VARCHAR(50) NOT NULL,
-    check_in_time TIMESTAMP,
-    check_out_time TIMESTAMP,
-    FOREIGN KEY (person_id) REFERENCES students (id),
-    FOREIGN KEY (person_id) REFERENCES faculty (id)
+
+CREATE TABLE log (
+    log_id SERIAL PRIMARY KEY,
+    id INTEGER ,
+    name VARCHAR(255) ,
+    type VARCHAR(255) ,
+    program VARCHAR(255) ,
+    department VARCHAR(255),
+    date DATE,
+    library_name VARCHAR(255),
+    checkin TIME,
+    checkout TIME
 );
 
 -- Insert admin user
