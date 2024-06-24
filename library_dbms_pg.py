@@ -8,6 +8,7 @@ import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.base import MIMEBase
 from email import encoders
+import subprocess
 
 class LibraryDBMS:
     def __init__(self, root):
@@ -207,10 +208,12 @@ class LibraryDBMS:
 
         tk.Label(report_window, text="Generate Report for:", font=("Helvetica", 16)).pack(pady=10)
 
-        tk.Button(report_window, text="Date-wise", command=lambda: self.create_report("date"), font=("Helvetica", 16)).pack(pady=5)
+        tk.Button(report_window, text="Date-wise", command=self.date_wise, font=("Helvetica", 16)).pack(pady=5)
         tk.Button(report_window, text="Membership Category-wise", command=lambda: self.create_report("category"), font=("Helvetica", 16)).pack(pady=5)
         tk.Button(report_window, text="User-wise", command=lambda: self.create_report("user"), font=("Helvetica", 16)).pack(pady=5)
-
+    def date_wise(self):
+        # Run the other Python script in a new process
+        subprocess.Popen(["python", "date_wise_report.py"])
     def create_report(self, report_type):
         report_window = tk.Toplevel(self.root)
         report_window.title(f"{report_type.capitalize()} Report")

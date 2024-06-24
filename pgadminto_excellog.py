@@ -40,7 +40,7 @@ cur.execute('SELECT * FROM log;')
 rows = cur.fetchall()
 
 # Define column names for the dataframe
-columns = ['log_id','id', 'name', 'type', 'program', 'department', 'date', 'checkin', 'checkout','library_name']
+columns = ['log_id','id', 'name', 'type', 'program', 'department', 'date', 'library_name','checkin', 'checkout']
 
 # Convert the data to a pandas DataFrame
 log_df = pd.DataFrame(rows, columns=columns)
