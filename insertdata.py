@@ -2,7 +2,7 @@
 
 import csv
 import psycopg2
-
+import os
 # Function to establish connection to PostgreSQL
 def connect_to_postgres():
     try:
@@ -18,7 +18,11 @@ def connect_to_postgres():
     except psycopg2.Error as e:
         print(f"Error connecting to PostgreSQL: {e}")
         return None
-
+def get_photo(photo_path):
+    if os.path.exists(photo_path):
+        with open(photo_path,"rb") as file:
+            return file.read()
+    return None
 # Function to read CSV file and process data
 def process_csv(conn, filename):
     try:
@@ -32,6 +36,8 @@ def process_csv(conn, filename):
                 name = row[1]
                 category = row[2]
                 sex = row[3]
+                photo_path="downloads /students_photos/{membership_id} "
+                photo=get_photo(photo_path)
 
                 # Check if membership_id contains "pdf", skip processing if it does
                 if "pdf" in membership_id.lower():
@@ -113,7 +119,7 @@ def process_csv(conn, filename):
                                  program = EXCLUDED.program,
                                  photo = EXCLUDED.photo,
                                  valid_year = EXCLUDED.valid_year"""
-                    cursor.execute(sql, (membership_id, name, department, program, None, None))
+                    cursor.execute(sql, (membership_id, name, department, program,psycopg2.Binary(photo) if photo else None, None))
                     conn.commit()
                 else:
                     print(f"Skipping record with incomplete data: {membership_id}")
