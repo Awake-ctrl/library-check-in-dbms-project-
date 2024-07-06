@@ -76,17 +76,24 @@ class LibraryInterface:
         tk.Button(self.library_frame, text="Back", command=self.go_back, font=("Helvetica", 16)).grid(row=7, column=3, pady=10, padx=10, sticky='se')
 
     def animate_gif(self, frame_index):
-        frame = self.gif_frames[frame_index]
-        self.gif_label.config(image=frame)
-        self.root.after(100, self.animate_gif, (frame_index + 1) % len(self.gif_frames))
+        if frame_index<len(self.gif_frames):
+            frame = self.gif_frames[frame_index]
+            if self.gif_label.winfo_exists():
+                
+                self.gif_label.config(image=frame)
+                self.root.after(100, self.animate_gif, (frame_index + 1) % len(self.gif_frames))
 
+            else:
+                pass
     def update_time(self):
         current_time = time.strftime('%H:%M:%S')
         current_date = time.strftime('%Y-%m-%d')
-        self.current_time_label.config(text=f"Current Time: {current_time}")
+        if self.current_time_label.winfo_exists():
+            
+            self.current_time_label.config(text=f"Current Time: {current_time}")
 
-        if current_time == '00:00:00' or self.check_pending_checkouts(current_date):
-            self.handle_midnight_checkout(current_date)
+            if current_time == '00:00:00' or self.check_pending_checkouts(current_date):
+                self.handle_midnight_checkout(current_date)
 
         self.root.after(1000, self.update_time)
 
@@ -258,12 +265,12 @@ class LibraryInterface:
         )
         cursor = conn.cursor()
 
-        cursor.execute('SELECT COUNT(*) FROM log WHERE checkout IS NULL')
+        cursor.execute('SELECT COUNT(*) FROM log WHERE checkout IS NULL AND library_name =%s',(self.library_name,))
         count = cursor.fetchone()[0]
 
         conn.close()
-        
-        self.people_count_label.config(text=f"No. of people in the library: {count}")
+        if self.people_count_label.winfo_exists():
+            self.people_count_label.config(text=f"No. of people in the library: {count}")
 
     def generate_report(self):
         ReportGeneration(self.root, self.library_name, self)

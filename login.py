@@ -57,12 +57,12 @@ class LoginInterface:
         self.password_entry.grid(row=2, column=1, padx=10, pady=10, sticky='ew')
         
         self.show_password_var = tk.IntVar()
-        tk.Checkbutton(form_frame, text="Show Password", variable=self.show_password_var, command=self.toggle_password, font=("Helvetica", 16)).grid(row=3, column=0, columnspan=2, pady=10)
+        tk.Checkbutton(form_frame, text="Show", variable=self.show_password_var, command=self.toggle_password, font=("Helvetica", 16)).grid(row=2, column=2, columnspan=2, pady=10)
         
-        tk.Button(form_frame, text="Login", command=self.login, font=("Helvetica", 16)).grid(row=4, column=0, columnspan=2, pady=10)
+        tk.Button(form_frame, text="Login", command=self.login, font=("Helvetica", 16)).grid(row=3, column=0, columnspan=2, pady=10)
         
         # Exit Button
-        tk.Button(form_frame, text="Exit", command=self.exit_app, font=("Helvetica", 16)).grid(row=4, column=1, columnspan=2, pady=10)
+        tk.Button(form_frame, text="Exit", command=self.exit_app, font=("Helvetica", 16)).grid(row=3, column=1, columnspan=2, pady=10,sticky="e")
 
     def load_images(self):
         base_dir = os.path.dirname(__file__)
