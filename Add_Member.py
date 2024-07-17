@@ -1,43 +1,15 @@
-# import os
-# import tkinter as tk 
-# from PIL import Image,ImageTk 
-# from library_selection import LibrarySelectionInterface
-
-# class add_member:
-#     def __init__(self,root,previous_interface,no_of) :
-#         self.root=root
-#         self.previous_interface=previous_interface
-#         if no_of=="single":
-#             self.create_Add_member_frame()
-#         else:
-#             self.create_Add_members_frame
-#     def create_Add_member_frame(self):
-#         self.add_frame=tk.Frame(self.root)
-#         self.add_frame.grid(sticky='nsew')
-        
-#         pass
-#     def create_Add_members_frame(self):
-#         pass
-    
-        
-        
-# if __name__=="__main__":
-#     root=tk.Tk()
-#     login_interface = LoginInterface(root)
-#     app = LibrarySelectionInterface(root, login_interface)
-#     no_of="single"
-#     b=add_member(root,app,no_of)
-#     root.mainloop()
 import os
 import tkinter as tk
 from tkinter import filedialog, messagebox
+from tkinter import ttk
 from PIL import Image, ImageTk
 import pandas as pd
 
 class add_member:
-    def __init__(self, root, previous_interface, no_of):
+    def __init__(self, root, previous_interface, no_of, member_type):
         self.root = root
         self.previous_interface = previous_interface
+        self.member_type = member_type
         if no_of == "single":
             self.create_Add_member_frame()
         else:
@@ -45,63 +17,54 @@ class add_member:
 
     def create_Add_member_frame(self):
         self.add_frame = tk.Frame(self.root)
-        self.add_frame.grid(sticky='nsew')
+        self.add_frame.pack(expand=True, fill=tk.BOTH, padx=20, pady=20)
 
-        tk.Label(self.add_frame, text="Add Member").grid(row=0, columnspan=2)
+        tk.Label(self.add_frame, text=f"{self.member_type} was selected", font=("Helvetica", 20)).pack(pady=10)
 
-        tk.Label(self.add_frame, text="Name:").grid(row=1, column=0, sticky=tk.W)
-        self.name_entry = tk.Entry(self.add_frame)
-        self.name_entry.grid(row=1, column=1)
+        # Entries for member details
+        self.create_label_entry(self.add_frame, "Name:")
+        self.create_label_entry(self.add_frame, "Membership ID:")
+        self.create_label_entry(self.add_frame, "Department:")
+        self.create_label_entry(self.add_frame, "Program:")
+        self.create_label_entry(self.add_frame, "Photo:")
 
-        tk.Label(self.add_frame, text="Membership ID:").grid(row=2, column=0, sticky=tk.W)
-        self.membership_id_entry = tk.Entry(self.add_frame)
-        self.membership_id_entry.grid(row=2, column=1)
+        # Submit button
+        self.submit_button = tk.Button(self.add_frame, text="Submit", command=self.submit_member, bg="black", fg="white", bd=0, highlightthickness=0, font=("Helvetica", 14))
+        self.submit_button.pack(pady=10)
 
-        tk.Label(self.add_frame, text="Department:").grid(row=3, column=0, sticky=tk.W)
-        self.department_entry = tk.Entry(self.add_frame)
-        self.department_entry.grid(row=3, column=1)
+        # Back button
+        self.back_button = tk.Button(self.add_frame, text="Back", command=self.go_back, bg="black", fg="white", bd=0, highlightthickness=0, font=("Helvetica", 14))
+        self.back_button.pack(pady=10)
 
-        tk.Label(self.add_frame, text="Program:").grid(row=4, column=0, sticky=tk.W)
-        self.program_entry = tk.Entry(self.add_frame)
-        self.program_entry.grid(row=4, column=1)
+    def create_label_entry(self, frame, label_text):
+        container = tk.Frame(frame)
+        container.pack(fill=tk.X, pady=5)
 
-        tk.Label(self.add_frame, text="Photo:").grid(row=5, column=0, sticky=tk.W)
-        self.photo_entry = tk.Entry(self.add_frame)
-        self.photo_entry.grid(row=5, column=1)
+        tk.Label(container, text=label_text, width=15, anchor='w', font=("Helvetica", 14)).pack(side=tk.LEFT)
+        entry = tk.Entry(container, font=("Helvetica", 14))
+        entry.pack(side=tk.LEFT, expand=True, fill=tk.X)
 
-        self.submit_button = tk.Button(self.add_frame, text="Submit", command=self.submit_member)
-        self.submit_button.grid(row=6, columnspan=2)
-
-        self.back_button = tk.Button(self.add_frame, text="Back", command=self.go_back)
-        self.back_button.grid(row=7, columnspan=2)
-
-        self.add_frame.pack(expand=True, fill=tk.BOTH)
+        setattr(self, label_text.split(":")[0].lower() + "_entry", entry)
 
     def create_Add_members_frame(self):
         self.add_frame = tk.Frame(self.root)
-        self.add_frame.grid(sticky='nsew')
+        self.add_frame.pack(expand=True, fill=tk.BOTH, padx=20, pady=20)
 
-        tk.Label(self.add_frame, text="Add Members in Bulk").grid(row=0, columnspan=2)
+        tk.Label(self.add_frame, text=f"{self.member_type} was selected", font=("Helvetica", 20)).pack(pady=10)
 
-        tk.Label(self.add_frame, text="CSV File Path:").grid(row=1, column=0, sticky=tk.W)
-        self.csv_path_entry = tk.Entry(self.add_frame)
-        self.csv_path_entry.grid(row=1, column=1)
-        self.csv_browse_button = tk.Button(self.add_frame, text="Browse", command=self.browse_csv)
-        self.csv_browse_button.grid(row=1, column=2)
+        self.create_label_entry(self.add_frame, "CSV File Path:")
+        self.csv_browse_button = tk.Button(self.add_frame, text="Browse", command=self.browse_csv, bg="black", fg="white", bd=0, highlightthickness=0, font=("Helvetica", 14))
+        self.csv_browse_button.pack(pady=10)
 
-        tk.Label(self.add_frame, text="Photo Folder Path:").grid(row=2, column=0, sticky=tk.W)
-        self.photo_folder_path_entry = tk.Entry(self.add_frame)
-        self.photo_folder_path_entry.grid(row=2, column=1)
-        self.photo_browse_button = tk.Button(self.add_frame, text="Browse", command=self.browse_photo_folder)
-        self.photo_browse_button.grid(row=2, column=2)
+        self.create_label_entry(self.add_frame, "Photo Folder Path:")
+        self.photo_browse_button = tk.Button(self.add_frame, text="Browse", command=self.browse_photo_folder, bg="black", fg="white", bd=0, highlightthickness=0, font=("Helvetica", 14))
+        self.photo_browse_button.pack(pady=10)
 
-        self.submit_button = tk.Button(self.add_frame, text="Submit", command=self.submit_bulk_members)
-        self.submit_button.grid(row=3, columnspan=3)
+        self.submit_button = tk.Button(self.add_frame, text="Submit", command=self.submit_bulk_members, bg="black", fg="white", bd=0, highlightthickness=0, font=("Helvetica", 14))
+        self.submit_button.pack(pady=10)
 
-        self.back_button = tk.Button(self.add_frame, text="Back", command=self.go_back)
-        self.back_button.grid(row=4, columnspan=3)
-
-        self.add_frame.pack(expand=True, fill=tk.BOTH)
+        self.back_button = tk.Button(self.add_frame, text="Back", command=self.go_back, bg="black", fg="white", bd=0, highlightthickness=0, font=("Helvetica", 14))
+        self.back_button.pack(pady=10)
 
     def browse_csv(self):
         self.csv_path_entry.delete(0, tk.END)
@@ -124,7 +87,6 @@ class add_member:
             messagebox.showerror("Input Error", "All fields are required.")
             return
 
-        # Here you can add code to save the member information to your database or a file
         messagebox.showinfo("Member Added", f"Name: {name}\nMembership ID: {membership_id}\nDepartment: {department}\nProgram: {program}\nPhoto: {photo}")
 
     def submit_bulk_members(self):
@@ -147,7 +109,6 @@ class add_member:
                 if not os.path.exists(photo_path):
                     photo_path = None
 
-                # Here you can add code to save each member information to your database or a file
                 print(f"Processed member: {name}, {membership_id}, {department}, {program}, {photo_path}")
 
             messagebox.showinfo("Bulk Members Added", "All members have been processed.")
@@ -156,16 +117,20 @@ class add_member:
 
     def go_back(self):
         self.add_frame.destroy()
+        self.previous_interface.create_library_selection_frame()
         self.previous_interface.root.deiconify()
 
 if __name__ == "__main__":
     root = tk.Tk()
     root.title("Library Management System")
-    root.geometry("500x400")
+    root.geometry("800x600")  # Set to a larger size to occupy full screen
 
     class LibrarySelectionInterface:
         def __init__(self, root, login_interface):
             self.root = root
+
+        def create_library_selection_frame(self):
+            pass  # Implement the necessary interface creation here
 
     class LoginInterface:
         def __init__(self, root):
@@ -174,5 +139,6 @@ if __name__ == "__main__":
     login_interface = LoginInterface(root)
     app = LibrarySelectionInterface(root, login_interface)
     no_of = "single"  # Change to "bulk" for bulk addition
-    b = add_member(root, app, no_of)
+    member_type = "UG"  # Example member type
+    b = add_member(root, app, no_of, member_type)
     root.mainloop()
