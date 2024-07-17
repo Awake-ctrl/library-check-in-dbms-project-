@@ -2,7 +2,7 @@ import os
 import tkinter as tk
 from PIL import Image, ImageTk
 from library_interface import LibraryInterface
-
+from Add_Member import add_member
 class LibrarySelectionInterface:
     def __init__(self, root, previous_interface):
         self.root = root
@@ -36,7 +36,17 @@ class LibrarySelectionInterface:
         tk.Button(button_frame, text="Sahyadri Library", command=self.open_sahyadri_library, font=("Helvetica", 16), width=20).grid(row=0, column=1, padx=20, pady=10)
         
         # Back button
-        tk.Button(button_frame, text="Back", command=self.go_back, font=("Helvetica", 16), width=20).grid(row=1, column=0, columnspan=2, padx=20, pady=10)
+        
+        tk.Button(button_frame, text="Back", command=self.go_back, font=("Poppins-Black", 16), width=20).grid(row=1, column=0, columnspan=2, padx=20, pady=10)
+        tk.Button(button_frame,text="Add single Member",command=self.add1,font=("Helvetica",18),width=25).grid(row=2,column=1,columnspan=3,padx=20,pady=20,sticky="s")
+        tk.Button(button_frame,text="Member List Upload",command=self.add_multi,font=("Helvetica",18    ),width=25).grid(row=2,column=0,columnspan=3,padx=20,pady=20,sticky="s")
+        
+    def add1(self):
+        self.library_selection_frame.destroy()
+        add_member(self.root,self,"single")
+    def add_multi(self):
+        self.library_selection_frame.destroy()
+        add_member(self.root,self,"multi")
 
     def load_logo_image(self):
         base_dir = os.path.dirname(__file__)

@@ -41,7 +41,7 @@ class LibraryInterface:
 
         self.people_count_label = tk.Label(self.library_frame, text="No. of people in the library: 0", font=("Helvetica", 16))
         self.people_count_label.grid(row=1, column=0, columnspan=2, padx=10, sticky='nw')
-        self.update_people_count()
+        self.update_people_count(self.people_count_label)
 
         self.scan_label = tk.Label(self.library_frame, text="Scan Here", font=("Helvetica", 16))
         self.scan_label.grid(row=2, column=0, columnspan=4, pady=10, sticky='ew')
@@ -161,14 +161,16 @@ class LibraryInterface:
             name = student[1]
             program = student[2]
             department = student[3]
-            self.display_person_details(student, person_type="student")
+            photo_path=student[5]
+            self.display_person_details(photo_path,student, person_type="student")
             
             self.log_entry(id, name, program, department, library_name, "student")
         elif faculty:
             id = faculty[0]
             name = faculty[1]
             department = faculty[2]
-            self.display_person_details(faculty, person_type="faculty")
+            photo_path=faculty[3]
+            self.display_person_details(photo_path,faculty, person_type="faculty")
             
             self.log_entry(id, name, None, department, library_name, "faculty")
         else:
@@ -177,7 +179,7 @@ class LibraryInterface:
         conn.close()
         self.scan_entry.delete(0, tk.END)
 
-    def display_person_details(self, person, person_type):
+    def display_person_details(self, photo_path,person, person_type):
         id, name, *details = person
         if person_type == "student":
             program, department = details[:2]  # Ensure we only take the first two details
@@ -186,9 +188,11 @@ class LibraryInterface:
             program = None
 
         # Load person photo or default photo
-        photo_path = f'images/{id}.png'  # Assuming photos are stored with their IDs as filenames
+        # photo_path = f'images/{id}.png'  # Assuming photos are stored with their IDs as filenames
+        
         try:
             person_photo = Image.open(photo_path)
+            print(person_photo)
         except FileNotFoundError:
             person_photo = Image.open('images/photo.jpg')  # Default photo if not found
         person_photo = person_photo.resize((150, 200), Image.LANCZOS)
@@ -255,7 +259,7 @@ class LibraryInterface:
 
         self.update_people_count()
 
-    def update_people_count(self):
+    def update_people_count(self,people_count):
         conn = psycopg2.connect(
             dbname="library_dbms",
             user="postgres",
@@ -267,11 +271,10 @@ class LibraryInterface:
 
         cursor.execute('SELECT COUNT(*) FROM log WHERE checkout IS NULL AND library_name =%s',(self.library_name,))
         count = cursor.fetchone()[0]
-
         conn.close()
-        if self.people_count_label.winfo_exists():
-            self.people_count_label.config(text=f"No. of people in the library: {count}")
-
+        if people_count.winfo_exists():
+            people_count.config(text=f"No. of people in the library: {count}")
+        
     def generate_report(self):
         ReportGeneration(self.root, self.library_name, self)
 

@@ -3,6 +3,7 @@
 import csv
 import psycopg2
 import os
+from PIL import Image
 # Function to establish connection to PostgreSQL
 def connect_to_postgres():
     try:
@@ -18,26 +19,43 @@ def connect_to_postgres():
     except psycopg2.Error as e:
         print(f"Error connecting to PostgreSQL: {e}")
         return None
-def get_photo(photo_path):
-    if os.path.exists(photo_path):
-        with open(photo_path,"rb") as file:
-            return file.read()
+def get_photo(photo_path,membership_id,extension):
+    dict=[".jpg",".jpeg",".JPG",".png",".PNG"]
+    # print(len(dict))
+    for index in range(len(dict)):
+        # print(index)
+        # print(type)"D:\albert sunny project\photos\142201003.jpeg"
+        path=photo_path+extension+str(membership_id)+dict[index]
+# The `print(path)` statement in the code is used to display the full path of the image file
+# being checked in the `get_photo` function. This helps in debugging and understanding which
+# image file path is being processed at that point in the code.
+#  print(path)
+        if os.path.exists(photo_path):
+            try:
+                with Image.open(path) as img:
+                    img.verify()  # Verify if it's a valid image
+                return path
+            except (IOError, SyntaxError) as e:
+                pass
     return None
 # Function to read CSV file and process data
-def process_csv(conn, filename):
+def process_csv(conn, filename,photo_path):
     try:
         with open(filename, newline='') as csvfile:
             reader = csv.reader(csvfile)
             next(reader)  # Skip header row
             cursor = conn.cursor()
+           
 
             for row in reader:
                 membership_id = row[0]
                 name = row[1]
                 category = row[2]
                 sex = row[3]
-                photo_path="downloads /students_photos/{membership_id} "
-                photo=get_photo(photo_path)
+                # photo=photo_path+f"\{membership_id}"+".jpg"
+                # print(photo)
+                extension=f"\\"
+                photo=get_photo(photo_path,membership_id,extension)
 
                 # Check if membership_id contains "pdf", skip processing if it does
                 if "pdf" in membership_id.lower():
@@ -117,9 +135,11 @@ def process_csv(conn, filename):
                              SET name = EXCLUDED.name,
                                  department = EXCLUDED.department,
                                  program = EXCLUDED.program,
-                                 photo = EXCLUDED.photo,
+                                 Photo = EXCLUDED.Photo,
                                  valid_year = EXCLUDED.valid_year"""
-                    cursor.execute(sql, (membership_id, name, department, program,psycopg2.Binary(photo) if photo else None, None))
+                    cursor.execute(sql, (membership_id, name, department, program,photo if photo else None, None))   #psycopg2.Binary(photo)
+                    if photo:
+                        print(photo)
                     conn.commit()
                 else:
                     print(f"Skipping record with incomplete data: {membership_id}")
@@ -139,5 +159,9 @@ def process_csv(conn, filename):
 # Main execution starts here
 if __name__ == "__main__":
     conn = connect_to_postgres()
+    #input a=file
+    file="D:\\albert sunny project\photos"
+    print(file)
+    # photo_path="D:\albert sunny project\photos"
     if conn:
-        process_csv(conn, 'student.csv')
+        process_csv(conn, 'student.csv',file)
