@@ -9,7 +9,10 @@ def get_text_width(text, font_name, font_size):
     font = ImageFont.truetype(font_name, font_size)
 
     # Get text size
-    text_width, _ = draw.textsize(text, font=font)
+    # text_width, _ = draw.textsize(text, font=font)
+    bbox = font.getbbox(text)
+    text_width = bbox[2] - bbox[0]
+    
 
     return text_width
 

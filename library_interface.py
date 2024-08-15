@@ -1,4 +1,5 @@
 import tkinter as tk
+import os
 from tkinter import messagebox
 import time
 from PIL import Image, ImageTk
@@ -10,6 +11,7 @@ class LibraryInterface:
         self.root = root
         self.library_name = library_name
         self.previous_interface = previous_interface
+        self.people_count_label=""
         self.create_library_interface()
 
     def create_library_interface(self):
@@ -26,9 +28,15 @@ class LibraryInterface:
 
         # Load and display the selected library image
         if self.library_name == 'Nila':
-            file = 'images/nila_library.png'
+            # file = 'images/nila_library.png'
+            file = os.path.join("images", "nila_library.png")
+            print(file)
+            
         elif self.library_name == 'Sahyadri':
-            file = 'images/sahyadri_library.png'
+            # file = 'images/sahyadri_library.png'
+            file = os.path.join("images", "sahyadri_library.png")
+            print(file)
+            
         self.library_image = Image.open(file)
         self.library_image = self.library_image.resize((1500, 110), Image.LANCZOS)
         self.library_image = ImageTk.PhotoImage(self.library_image)
@@ -137,7 +145,7 @@ class LibraryInterface:
         conn.commit()
         conn.close()
 
-        self.update_people_count()
+        self.update_people_count(self.people_count_label)
 
     def search_id(self, library_name):
         person_id = self.scan_entry.get()
@@ -190,10 +198,13 @@ class LibraryInterface:
         # Load person photo or default photo
         # photo_path = f'images/{id}.png'  # Assuming photos are stored with their IDs as filenames
         
-        try:
-            person_photo = Image.open(photo_path)
-            print(person_photo)
-        except FileNotFoundError:
+        
+           
+        if photo_path!=None:
+                person_photo = Image.open(photo_path)
+        
+                print(person_photo)
+        else:
             person_photo = Image.open('images/photo.jpg')  # Default photo if not found
         person_photo = person_photo.resize((150, 200), Image.LANCZOS)
         person_photo = ImageTk.PhotoImage(person_photo)
@@ -257,7 +268,7 @@ class LibraryInterface:
         conn.commit()
         conn.close()
 
-        self.update_people_count()
+        self.update_people_count(self.people_count_label)
 
     def update_people_count(self,people_count):
         conn = psycopg2.connect(
@@ -272,8 +283,10 @@ class LibraryInterface:
         cursor.execute('SELECT COUNT(*) FROM log WHERE checkout IS NULL AND library_name =%s',(self.library_name,))
         count = cursor.fetchone()[0]
         conn.close()
-        if people_count.winfo_exists():
-            people_count.config(text=f"No. of people in the library: {count}")
+        people_count.config(text=f"No. of people in the library: {count}")
+        
+        # if people_count.winfo_exists():
+        #     people_count.config(text=f"No. of people in the library: {count}")
         
     def generate_report(self):
         ReportGeneration(self.root, self.library_name, self)

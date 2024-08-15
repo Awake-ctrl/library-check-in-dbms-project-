@@ -33,11 +33,12 @@ from fontsize import get_text_width
 from changefont import change_font_size
 from header import header_name
 
-class ReportGenerator:
-    def __init__(self, root):
+class ReportGenerator1:
+    def __init__(self, root,previous_window):
         self.root = root
-        self.previous_window = None # To store the previous window
+        self.previous_window = previous_window # To store the previous window
         self.DATA=""
+        
         self.membership_value=False
         self.Membership_type=""
         self.first_page=True
@@ -66,6 +67,7 @@ class ReportGenerator:
         
         #from date
         tk.Label(self.frame, text="From Date (DD-MM-YYYY)", font=("Helvetica", 14)).grid(row=3, column=0, pady=10,sticky="w")
+        
         self.from_date_entry = DateEntry(self.frame, date_pattern='dd-mm-yyyy', font=("Helvetica", 14))
         self.from_date_entry.grid(row=3, column=1, pady=10,sticky="w")
         
@@ -87,16 +89,27 @@ class ReportGenerator:
         self.library_name_option.grid(row=4, column=3, pady=10,sticky="w")
 
         #data display
-        self.data_display = tk.Text(self.frame, font=("Helvetica", 12), height=25, width=100)
-        self.data_display.grid(row=5, column=0, columnspan=2, pady=10,sticky='w')
+        self.data_display = tk.Text(self.frame, font=("Helvetica", 12), height=25, width=150)
+        self.data_display.grid(row=5, column=0, columnspan=4, pady=10,sticky='ew')
         
         #report button
         tk.Button(self.frame, text="Generate Report", command=self.generate_report, font=("Helvetica", 14)).grid(row=6, column=0, columnspan=2, pady=10)
         
-        tk.Button(self.frame, text="Save", command=lambda : self.create_pie_charts(self.DATA,self.membership_value,self.Membership_type), font=("Helvetica", 14)).grid(row=6, column=1, columnspan=2, pady=10)
+        self.save_button=tk.Button(self.frame, text="Save", command=self.show_save_options, font=("Helvetica", 14))
+        self.save_button.grid(row=6, column=1, columnspan=2, pady=10)
+        # self.save_button.grid_forget()
         
+        self.save_options_frame = tk.Frame(self.frame)
+        self.save_options_frame.grid(row=6, column=1,pady=9)
+        self.save_options_frame.grid_remove()  # Hide the report options frame initially
+
+        tk.Button(self.save_options_frame, text="Save as pdf", command=lambda : self.create_pie_charts(self.DATA,self.membership_value,self.Membership_type), font=("Poppins", 16)).grid(row=0, column=0, padx=10)
+        tk.Button(self.save_options_frame, text="Save as excel", command=self.save_as_excel, font=("Poppins", 16)).grid(row=0, column=1, padx=10)
+
+        # tk.Button(self.frame,text="Save as excel",command=self.save_as_excel,font=("Helvetica",14)).grid(row=6,column=2,columnspan=2,pady=10)
         #back button
         tk.Button(self.frame, text="Back", command=self.go_back, font=("Helvetica", 14)).grid(row=7, column=0, columnspan=2, pady=10)
+        tk.Button(self.frame ,text=" exit",command=self.root.destroy,font=('Helvetica',14)).grid(row=7,column=1,columnspan=2,pady=10)
         
     def toggle_password(self):
         if self.show_password_var.get():
@@ -144,9 +157,11 @@ class ReportGenerator:
                 # Filter data based on date range and library name
 
                 data['date'] = pd.to_datetime(data['date'])
-                print(data['date'])
+
+                # print(data['date'])
                 data = data[(data['date'] >= from_date) & (data['date'] <= to_date)]
             
+                data['date'] = pd.to_datetime(data['date']).dt.strftime('%d-%m-%Y')
                 
 
                 libraries = ["Nila", "Sahyadri"]
@@ -306,7 +321,7 @@ class ReportGenerator:
                 c = canvas.Canvas(pdf_path, pagesize=LETTER)
                 width, height = LETTER
                 
-                c.drawString(30, height - 30, "Library Log Report")
+                c.drawString(30, height - 30, "Indian Institute of Technology Palakkad")
                 #loading the pi charts
                 pie_charts_reader = ImageReader(pie_charts)
                 c.drawImage(pie_charts_reader, 30, height - 750, width-60, 700)
@@ -407,7 +422,7 @@ class ReportGenerator:
                                 c.setFont("Helvetica", 8)
                             
                             name_parts=value.split()
-                            print("hakuna matata")
+                            # print("hakuna matata")
                             first_name=' '.join(name_parts[:-1])
                             last_name=name_parts[-1]
                             c.drawString(x,y,first_name)
@@ -426,8 +441,7 @@ class ReportGenerator:
                 if pdf_path:
                     c.showPage()
                     c.save()
-                else:
-                    print("kabuchi")
+               
                 messagebox.showinfo("Info",f"Report saved successfully as {pdf_path}")
             except Exception as e:
                 messagebox.showinfo("Error",f"Unable to save file due to {e}")
@@ -469,12 +483,41 @@ class ReportGenerator:
             # c.showPage()
             # c.save()
             # messagebox.showinfo("Info", f"Report saved successfully as {pdf_path}")
-
+    def save_as_excel(self):
+        if self.DATA is None or self.DATA.empty:
+            messagebox.showinfo("info","no data to save")
+            return
+        save_path=filedialog.asksaveasfilename(
+            defaultextension=".xlsx",
+            filetypes=[("Excel files","*.xlsx")],
+            title="Save as Excel",
+            initialfile="date_wise_report.xlsx"
+        )
+        if save_path:
+            try:
+                data=self.DATA.drop(columns=['S.NO'], errors='ignore')
+                
+                data.to_excel(save_path,index=False)
+                messagebox.showinfo("info",f"Data saved successfully as {save_path}")
+            except Exception as e:
+                messagebox.showerror("Error",f"Failed to save Excel file: {e}")
+    def show_save_options(self):
+        self.save_button.grid_forget()
+        self.save_options_frame.grid(row=6, column=1, columnspan=2, pady=10)
+        self.root.after(10000, self.reset_page)
+        
+        # print("ok")
+    def reset_page(self):
+        self.save_options_frame.grid_remove()
+        self.save_button.grid(row=6, column=1, columnspan=2, pady=5)
+        
     def go_back(self):
-        self.root.destroy()
-        if self.previous_window:
+        self.frame.destroy()
+        self.previous_window.create_library_interface()
+        
+        # if self.previous_window:
             
-            self.previous_window.deiconify()
+        #     self.previous_window.deiconify()
 
     def run(self):
         self.root.attributes('-fullscreen', True)  # Set fullscreen mode

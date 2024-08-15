@@ -10,6 +10,7 @@ from email.mime.base import MIMEBase
 from email import encoders
 import subprocess
 from report_interface import ReportInterface
+from user_wise_report import ReportGenerator
 
 
 
@@ -48,12 +49,16 @@ class ReportGeneration:
     #     ReportInterface(self.root, "category", self.library_name, self)
 
     def user_wise_report(self, report_type):
+        self.report_frame.destroy()
+        
         try:
             subprocess.run(["python","pgadminto_excellog.py"],check=True)
             print("hello new excel")
         except subprocess.CalledProcessError as e:
             print(f"Error:{e}")
-        subprocess.Popen(["python","user_wise_report.py"])
+        ReportGenerator(self.root,self.previous_interface,self.library_name)
+            
+        # subprocess.Popen(["python","user_wise_report.py"])
         # self.report_frame.destroy()
         # ReportInterface(self.root, "user", self.library_name, self)
 

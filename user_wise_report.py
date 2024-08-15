@@ -80,11 +80,13 @@ from tkcalendar import DateEntry
 from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
 from fontsize import get_text_width
+# from library_interface import LibraryInterface
 
-class ReportGenerator:
-    def __init__(self, root):
+class ReportGenerator2:
+    def __init__(self,root,previous_window):
         self.root = root
-        self.previous_window = None  # To store the previous window
+        self.previous_window = previous_window  # To store the previous window
+        
         self.DATA = ""
         self.membership_value = False
         self.Membership_type = ""
@@ -101,61 +103,92 @@ class ReportGenerator:
     def create_interface(self):
         self.frame = tk.Frame(self.root)
         self.frame.grid(sticky='nsew')
-        tk.Label(self.frame, text="Report", font=("Helvetica", 24)).grid(row=0, column=1, columnspan=2, pady=10, sticky="ew")
-        tk.Label(self.frame, text="       ", font=("Helvetica", 24)).grid(row=1, column=1, columnspan=2, pady=10, sticky="ew")
+        tk.Label(self.frame, text=f"""Indian Institute of Technology Palakkad
+        user wise library report""",font=("Helvetica", 24)).grid(row=0, column=0, pady=10,padx=50)
+        # tk.Label(self.frame, text="       ", font=("Helvetica", 24)).grid(row=1, column=0, columnspan=2, pady=10, sticky="ew")
 
         # Username
-        tk.Label(self.frame, text="User Name", font=("Helvetica", 14)).grid(row=2, column=0, pady=10, sticky="w")
-        self.username = tk.Entry(self.frame, font=("Helvetica", 14))
-        self.username.grid(row=2, column=1, pady=10, sticky="w")
+        self.login_details_frame=tk.Frame(self.frame)
+        self.login_details_frame.grid(row=2,column=0,columnspan=3,padx=50,sticky="ew")
+        
+        
+        self.username_label=tk.Label(self.login_details_frame, text="User Name", font=("Helvetica", 14))
+        self.username_label.grid(row=0, column=0, pady=10,padx=30)
+        self.username = tk.Entry(self.login_details_frame, font=("Helvetica", 14))
+        self.username.grid(row=0, column=1, pady=10,padx=30)
 
         # Password
-        tk.Label(self.frame, text="Password", font=("Helvetica", 14)).grid(row=2, column=2, pady=10, sticky="w")
-        self.password = tk.Entry(self.frame, show="*", font=("Helvetica", 14))
-        self.password.grid(row=2, column=3, pady=10, sticky="w")
+        self.password_label=tk.Label(self.login_details_frame, text="Password", font=("Helvetica", 14))
+        self.password_label.grid(row=0, column=2, pady=10,padx=30)
+        self.password = tk.Entry(self.login_details_frame, show="*", font=("Helvetica", 14))
+        self.password.grid(row=0, column=3, pady=10, padx=30)
         self.show_password_var = tk.IntVar()
-        tk.Checkbutton(self.frame, text="Show", variable=self.show_password_var, command=self.toggle_password, font=("Helvetica", 16)).grid(row=2, column=5, columnspan=2, pady=10)
+        self.password_check_button=tk.Checkbutton(self.login_details_frame, text="Show", variable=self.show_password_var, command=self.toggle_password, font=("Helvetica", 16))
+        self.password_check_button.grid(row=0, column=5, columnspan=2,padx=30, pady=10)
 
         # From date
-        tk.Label(self.frame, text="From Date (DD-MM-YYYY)", font=("Helvetica", 14)).grid(row=3, column=0, pady=10, sticky="w")
-        self.from_date_entry = DateEntry(self.frame, date_pattern='dd-mm-yyyy', font=("Helvetica", 14), year=self.earliest_date.year, month=self.earliest_date.month, day=self.earliest_date.day)
-        self.from_date_entry.grid(row=3, column=1, pady=10, sticky="w")
+        self.date_details_frame=tk.Frame(self.frame)
+        self.date_details_frame.grid(row=3,column=0,padx=50)
+        self.from_date_label=tk.Label(self.date_details_frame, text="From Date (DD-MM-YYYY)", font=("Helvetica", 14))
+        self.from_date_label.grid(row=0, column=0, pady=10,padx=30,)
+        self.from_date_entry = DateEntry(self.date_details_frame, date_pattern='dd-mm-yyyy', font=("Helvetica", 14), year=self.earliest_date.year, month=self.earliest_date.month, day=self.earliest_date.day)
+        self.from_date_entry.grid(row=0, column=1, pady=10, padx=30)
 
         # To date
-        tk.Label(self.frame, text="To Date (DD-MM-YYYY)", font=("Helvetica", 14)).grid(row=3, column=2, pady=10, sticky="w")
-        self.to_date_entry = DateEntry(self.frame, date_pattern='dd-mm-yyyy', font=("Helvetica", 14))
-        self.to_date_entry.grid(row=3, column=3, pady=10, sticky="w")
+        self.to_date_label=tk.Label(self.date_details_frame, text="To Date (DD-MM-YYYY)", font=("Helvetica", 14))
+        self.to_date_label.grid(row=0, column=2, pady=10, padx=30)
+        self.to_date_entry = DateEntry(self.date_details_frame, date_pattern='dd-mm-yyyy', font=("Helvetica", 14))
+        self.to_date_entry.grid(row=0, column=3, pady=10, padx=30)
 
         # Membership category
-        tk.Label(self.frame, text="Membership Category", font=("Helvetica", 14)).grid(row=4, column=0, pady=10, sticky="w")
+        self.type_details_frame=tk.Frame(self.frame)
+        self.type_details_frame.grid(row=4,column=0,padx=50)
+        self.membership_type_label=tk.Label(self.type_details_frame, text="Membership Category", font=("Helvetica", 14))
+        self.membership_type_label.grid(row=0, column=0, pady=10, padx=30)
         self.membership_var = tk.StringVar()
-        self.membership_option = tk.OptionMenu(self.frame, self.membership_var, "UG", "PG", "Research Scholar", "Faculty", "Staff", "External Users", "Alumni", "Family", "ALL")
-        self.membership_option.grid(row=4, column=1, pady=10, sticky="w")
+        self.membership_option = tk.OptionMenu(self.type_details_frame, self.membership_var, "UG", "PG", "Research Scholar", "Faculty", "Staff", "External Users", "Alumni", "Family", "ALL")
+        self.membership_option.grid(row=0, column=1, pady=10, padx=30)
 
         # Sorting order
-        tk.Label(self.frame, text="Sorting Order", font=("Helvetica", 14)).grid(row=4, column=2, pady=10, sticky="w")
+        self.sort_label=tk.Label(self.type_details_frame, text="Sorting Order", font=("Helvetica", 14))
+        self.sort_label.grid(row=0, column=2, pady=10,padx=30)
         self.sorting_var = tk.StringVar()
-        self.sorting_option = tk.OptionMenu(self.frame, self.sorting_var, "Ascending", "Descending")
-        self.sorting_option.grid(row=4, column=3, pady=10, sticky="w")
+        self.sorting_option = tk.OptionMenu(self.type_details_frame, self.sorting_var, "Ascending", "Descending")
+        self.sorting_option.grid(row=0, column=3, pady=10, padx=30)
 
         # Library name
-        tk.Label(self.frame, text="Library Name", font=("Helvetica", 14)).grid(row=4, column=4, pady=10, sticky="w")
+        self.library_name_label=tk.Label(self.type_details_frame, text="Library Name", font=("Helvetica", 14))
+        self.library_name_label.grid(row=0, column=4, pady=10, padx=30)
         self.library_name_var = tk.StringVar()
-        self.library_name_option = tk.OptionMenu(self.frame, self.library_name_var, "Nila", "Sahyadri", "Both")
-        self.library_name_option.grid(row=4, column=5, pady=10, sticky="w")
+        self.library_name_option = tk.OptionMenu(self.type_details_frame, self.library_name_var, "Nila", "Sahyadri", "Both")
+        self.library_name_option.grid(row=0, column=5, pady=10,padx=30)
 
         # Data display
-        self.data_display = tk.Text(self.frame, font=("Helvetica", 12), height=25, width=100)
-        self.data_display.grid(row=5, column=0, columnspan=4, pady=10, sticky='w')
-
+        self.data_display_frame=tk.Frame(self.frame)
+        self.data_display_frame.grid(row=5, column=0, pady=10, sticky='ew',padx=50)
+        
+        
+        self.data_display = tk.Text(self.data_display_frame, font=("Helvetica", 12), height=25, width=100)
+        self.data_display.grid(row=0, column=0, pady=10, sticky='ew',padx=30)
+        
+        self.footer_frame=tk.Frame(self.frame)
+        self.footer_frame.grid(row=6, column=0, pady=10, sticky='ew',padx=50)
         # Report button
-        tk.Button(self.frame, text="Generate Report", command=self.generate_report, font=("Helvetica", 14)).grid(row=6, column=0, columnspan=2, pady=10)
+        tk.Button(self.footer_frame, text="Generate Report", command=self.generate_report, font=("Helvetica", 14)).grid(row=0, column=0, pady=10,padx=30)
 
-        # Save button
-        tk.Button(self.frame, text="Save", command=self.save_report, font=("Helvetica", 14)).grid(row=6, column=2, columnspan=2, pady=10)
+        self.save_button=tk.Button(self.footer_frame, text="Save", command=self.show_save_options, font=("Helvetica", 14))
+        self.save_button.grid(row=0, column=4,  pady=10,padx=30)
+        # self.save_button.grid_forget()
+        
+        self.save_options_frame = tk.Frame(self.footer_frame)
+        self.save_options_frame.grid(row=0, column=1,pady=9)
+        self.save_options_frame.grid_remove()  # Hide the report options frame initially
+
+        tk.Button(self.save_options_frame, text="Save as pdf", command=self.save_report, font=("Poppins", 16)).grid(row=0, column=0, padx=30)
+        tk.Button(self.save_options_frame, text="Save as excel", command=self.save_as_excel, font=("Poppins", 16)).grid(row=0, column=1, padx=0)
 
         # Back button
-        tk.Button(self.frame, text="Back", command=self.go_back, font=("Helvetica", 14)).grid(row=7, column=0, columnspan=4, pady=10)
+        tk.Button(self.footer_frame, text="Back", command=self.go_back, font=("Helvetica", 14)).grid(row=1, column=0, pady=10,padx=30)
 
     def toggle_password(self):
         if self.show_password_var.get():
@@ -285,9 +318,18 @@ class ReportGenerator:
             line_gap=10
             #Draw headers
             x=10
+            c.drawString(x, y_start, "_" * 130)
+            y_start-=11
             for header,width in zip(headers,col_widths):
+                x-=1
+                c.drawString(x, y_start, "|")
+                x+=5
                 c.drawString(x,y_start,header)
-                x+=width
+                x+=width-5
+            c.drawString(x, y_start, "|")
+            y_start-=9
+            x=10
+            c.drawString(x, y_start, "_"*130)
             # Draw data rows
             y=y_start-20
             two_rows=False
@@ -364,11 +406,43 @@ class ReportGenerator:
         #         row_text = ", ".join(str(value) for value in row)
         #         c.drawString(30, text_y, row_text)
         #         text_y -= 10
-
-
+        
+    
+    def save_as_excel(self):
+        if self.DATA is None or self.DATA.empty:
+            messagebox.showinfo("info","no data to save")
+            return
+        save_path=filedialog.asksaveasfilename(
+            defaultextension=".xlsx",
+            filetypes=[("Excel files","*.xlsx")],
+            title="Save as Excel",
+            initialfile="date_wise_report.xlsx"
+        )
+        if save_path:
+            try:
+                data=self.DATA.drop(columns=['S.NO'], errors='ignore')
+                
+                data.to_excel(save_path,index=False)
+                messagebox.showinfo("info",f"Data saved successfully as {save_path}")
+            except Exception as e:
+                messagebox.showerror("Error",f"Failed to save Excel file: {e}")
+    def show_save_options(self):
+        self.save_button.grid_forget()
+        # self.save_options_frame.grid(row=6, column=1, columnspan=2, pady=10)
+        self.save_options_frame.grid(row=0, column=1,pady=9)
+        self.root.after(10000, self.reset_page)
+        
+        # print("ok")
+    def reset_page(self):
+        self.save_options_frame.grid_remove()
+        # self.save_button.grid(row=6, column=1, columnspan=2, pady=5)
+        self.save_button.grid(row=0, column=4,  pady=10)
+        
+       
     def go_back(self):
         self.frame.destroy()
-        self.root.destroy()
+        self.previous_window.create_library_interface()
+        # self.previous_window(self.LIBRARY_NAME)
 
     def run(self):
         self.root.attributes('-fullscreen', True)

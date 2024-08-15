@@ -25,19 +25,22 @@ class LoginInterface:
         self.login_frame.columnconfigure(1, weight=2)
         
         # Load and place images
-        self.load_images()
+        
+        # self.load_images()   dont want the image to be added 
 
         # Top Logo Image
-        logo_label = tk.Label(self.login_frame, image=self.logo_img)
-        logo_label.grid(row=0, column=0, columnspan=2, sticky='ew')
+        # logo_label = tk.Label(self.login_frame, image=self.logo_img)
+        # logo_label.grid(row=0, column=0, columnspan=2, sticky='ew')
 
         # Left Image
-        left_image_label = tk.Label(self.login_frame, image=self.left_image)
-        left_image_label.grid(row=1, column=0, rowspan=4, sticky='ns')
+        # left_image_label = tk.Label(self.login_frame, image=self.left_image)
+        # left_image_label.grid(row=1, column=0, rowspan=4, sticky='ns')
 
         # Username and Password
+        self.institute_name_label=tk.Label(self.login_frame,text="INDIAN INSTITUTE OF TECHNOLOGY PALAKKAD \n LOGIN PAGE", font=("Helvetica", 40),bg="purple")
+        self.institute_name_label.grid(row=0,column=0,columnspan=2,sticky='ew',padx=20,pady=20)
         form_frame = tk.Frame(self.login_frame)
-        form_frame.grid(row=1, column=1, rowspan=4, padx=10, pady=10, sticky='nsew')
+        form_frame.grid(row=1, column=0, rowspan=4, padx=10, pady=10, sticky='nsew')
         form_frame.columnconfigure(0, weight=1)
         form_frame.columnconfigure(1, weight=3)
         
@@ -48,11 +51,11 @@ class LoginInterface:
         form_frame.rowconfigure(4, weight=1)  # Added to accommodate the exit button
 
         # Positioning the form elements in the middle
-        tk.Label(form_frame, text="Username", font=("Helvetica", 25)).grid(row=1, column=0, padx=10, pady=5, sticky='e')
-        self.username_entry = tk.Entry(form_frame, font=("Helvetica", 20))
+        tk.Label(form_frame, text="Username",fg="blue", font=("Helvetica", 25)).grid(row=1, column=0, padx=10, pady=5, sticky='ew')
+        self.username_entry = tk.Entry(form_frame, font=("Helvetica", 20),border=None,borderwidth=2)
         self.username_entry.grid(row=1, column=1, padx=10, pady=10, sticky='ew')
         
-        tk.Label(form_frame, text="Password", font=("Helvetica", 25)).grid(row=2, column=0, padx=10, pady=5, sticky='e')
+        tk.Label(form_frame, text="Password",fg="blue", font=("Helvetica", 25)).grid(row=2, column=0, padx=10, pady=5, sticky='ew')
         self.password_entry = tk.Entry(form_frame, show="*", font=("Helvetica", 20))
         self.password_entry.grid(row=2, column=1, padx=10, pady=10, sticky='ew')
         
@@ -66,8 +69,10 @@ class LoginInterface:
 
     def load_images(self):
         base_dir = os.path.dirname(__file__)
-        left_image_path = os.path.join(base_dir, "images", "nila entry.jpg")
-        logo_image_path = os.path.join(base_dir, "images", "logotext.png")
+        left_image_path = os.path.join( "images", "nila entry.jpg")
+        logo_image_path = os.path.join("images", "logotext.png")
+        print(left_image_path)
+        print(logo_image_path)
 
         self.left_image = Image.open(left_image_path)
         self.left_image = self.left_image.resize((800, 700), Image.Resampling.LANCZOS)
@@ -92,7 +97,9 @@ class LoginInterface:
                 dbname="library_dbms",
                 user="postgres",
                 password="S@i*iran2004",
-                host="localhost",
+                # host="localhost",
+                
+                host="10.32.11.146",
                 port="5432"
             )
             cursor = conn.cursor()

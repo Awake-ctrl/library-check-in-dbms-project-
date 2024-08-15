@@ -1,10 +1,9 @@
-# 
-
+import sys
 import csv
 import psycopg2
 import os
 from PIL import Image
-# Function to establish connection to PostgreSQL
+
 def connect_to_postgres():
     try:
         conn = psycopg2.connect(
@@ -19,50 +18,39 @@ def connect_to_postgres():
     except psycopg2.Error as e:
         print(f"Error connecting to PostgreSQL: {e}")
         return None
-def get_photo(photo_path,membership_id,extension):
-    dict=[".jpg",".jpeg",".JPG",".png",".PNG"]
-    # print(len(dict))
-    for index in range(len(dict)):
-        # print(index)
-        # print(type)"D:\albert sunny project\photos\142201003.jpeg"
-        path=photo_path+extension+str(membership_id)+dict[index]
-# The `print(path)` statement in the code is used to display the full path of the image file
-# being checked in the `get_photo` function. This helps in debugging and understanding which
-# image file path is being processed at that point in the code.
-#  print(path)
-        if os.path.exists(photo_path):
+
+def get_photo(photo_path, membership_id, extension):
+    dict = [".jpg", ".jpeg", ".JPG", ".png", ".PNG"]
+    for ext in dict:
+        path = os.path.join(photo_path, f"{membership_id}{ext}")
+        if os.path.exists(path):
             try:
                 with Image.open(path) as img:
-                    img.verify()  # Verify if it's a valid image
+                    img.verify()
                 return path
-            except (IOError, SyntaxError) as e:
+            except (IOError, SyntaxError):
                 pass
     return None
-# Function to read CSV file and process data
-def process_csv(conn, filename,photo_path):
+
+def process_csv(conn, filename, photo_path):
     try:
         with open(filename, newline='') as csvfile:
             reader = csv.reader(csvfile)
-            next(reader)  # Skip header row
+            next(reader)
             cursor = conn.cursor()
-           
 
             for row in reader:
                 membership_id = row[0]
                 name = row[1]
                 category = row[2]
                 sex = row[3]
-                # photo=photo_path+f"\{membership_id}"+".jpg"
-                # print(photo)
-                extension=f"\\"
-                photo=get_photo(photo_path,membership_id,extension)
+                extension = "\\"
+                photo = get_photo(photo_path, membership_id, extension)
 
-                # Check if membership_id contains "pdf", skip processing if it does
                 if "pdf" in membership_id.lower():
                     print(f"Ignoring record with membership ID: {membership_id}")
                     continue
 
-                # Determine program and department based on category and membership_id
                 program = ""
                 department = ""
 
@@ -91,7 +79,7 @@ def process_csv(conn, filename,photo_path):
                     elif membership_id.startswith("22"):
                         department = "Physics"
                     else:
-                        department="UNKNOWN"
+                        department = "UNKNOWN"
 
                 elif category == "ST":
                     program = "UG"
@@ -127,17 +115,16 @@ def process_csv(conn, filename,photo_path):
                     elif membership_id.startswith("22"):
                         department = "Physics"
 
-                # Insert or update record into PostgreSQL table
-                if department and program:  # Ensure both program and department are determined
+                if department and program:
                     sql = """INSERT INTO student (id, name, department, program, photo, valid_year)
                              VALUES (%s, %s, %s, %s, %s, %s)
                              ON CONFLICT (id) DO UPDATE
                              SET name = EXCLUDED.name,
                                  department = EXCLUDED.department,
                                  program = EXCLUDED.program,
-                                 Photo = EXCLUDED.Photo,
+                                 photo = EXCLUDED.photo,
                                  valid_year = EXCLUDED.valid_year"""
-                    cursor.execute(sql, (membership_id, name, department, program,photo if photo else None, None))   #psycopg2.Binary(photo)
+                    cursor.execute(sql, (membership_id, name, department, program, photo if photo else None, None))
                     if photo:
                         print(photo)
                     conn.commit()
@@ -156,12 +143,15 @@ def process_csv(conn, filename,photo_path):
             conn.close()
             print("PostgreSQL connection is closed")
 
-# Main execution starts here
 if __name__ == "__main__":
+    if len(sys.argv) != 3:
+        print("Usage: python insertdata.py <csv_file_path> <photo_folder_path>")
+        sys.exit(1)
+
+    csv_file_path = sys.argv[1]
+    photo_folder_path = sys.argv[2]
+
     conn = connect_to_postgres()
-    #input a=file
-    file="D:\\albert sunny project\photos"
-    print(file)
-    # photo_path="D:\albert sunny project\photos"
     if conn:
-        process_csv(conn, 'student.csv',file)
+        process_csv(conn, csv_file_path, photo_folder_path)
+
